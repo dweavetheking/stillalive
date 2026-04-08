@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Limits
     max_image_size_mb: int = 10
     max_audio_size_mb: int = 20
-    max_audio_duration_seconds: int = 120
+    max_audio_duration_seconds: int = 180
     max_history_entries: int = 50
 
     # Cleanup
