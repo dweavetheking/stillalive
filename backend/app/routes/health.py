@@ -16,7 +16,7 @@ async def health():
 
     if torch.cuda.is_available():
         gpu = torch.cuda.get_device_name(0)
-        vram_total = round(torch.cuda.get_device_properties(0).total_mem / 1e9, 1)
+        vram_total = round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1)
         vram_used = round(torch.cuda.memory_allocated(0) / 1e9, 1)
 
     return HealthResponse(
