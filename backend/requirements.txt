@@ -16,7 +16,7 @@ Pillow>=9.2.0,<11.0
 torch>=2.1.0
 torchvision>=0.16.0
 torchaudio>=2.1.0
-diffusers>=0.25.0
+diffusers==0.27.2
 transformers>=4.36.0
 accelerate>=0.25.0
 omegaconf>=2.3.0
