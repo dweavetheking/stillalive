@@ -25,7 +25,7 @@ def load_pose_template(
     Returns tensor of shape (1, 3, num_frames, height, width).
     """
     # Import from echomimic_v2 source
-    from src.utils.draw_utils import draw_pose_select_v2
+    from src.utils.dwpose_util import draw_pose_select_v2
 
     style_dir = Path(pose_dir) / pose_style
     if not style_dir.exists():
