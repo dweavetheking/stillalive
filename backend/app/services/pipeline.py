@@ -106,9 +106,9 @@ class EchoMimicPipeline:
             )
         )
 
-        # Audio guider
+        # Audio guider (whisper auto-downloads the "tiny" model)
         audio_processor = load_audio_model(
-            model_path=os.path.join(model_dir, "echomimic_v2", "pretrained_weights", "audio_processor", "tiny.pt"),
+            model_path="tiny",
             device=self.device,
         )
 
