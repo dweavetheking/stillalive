@@ -1,0 +1,32 @@
+# FastAPI
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# Settings
+pydantic-settings==2.7.1
+
+# Audio processing
+pydub==0.25.1
+
+# Image processing
+Pillow==11.1.0
+
+# ML (pre-installed on RunPod, pinned for reference)
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+diffusers>=0.25.0
+transformers>=4.36.0
+accelerate>=0.25.0
+omegaconf>=2.3.0
+einops>=0.7.0
+
+# Video
+moviepy==2.1.2
+
+# Utilities
+numpy>=1.24.0
+opencv-python-headless>=4.8.0
+scipy>=1.11.0
+boto3>=1.35.0
