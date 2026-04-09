@@ -183,6 +183,9 @@ class EchoMimicPipeline:
                 height=resolution,
             )
 
+            # Cast poses to correct dtype/device for pose encoder
+            poses_tensor = poses_tensor.to(device=self.device, dtype=self.weight_dtype)
+
             if job_manager.is_cancelled(job_id):
                 return
 

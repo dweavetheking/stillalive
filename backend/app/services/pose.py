@@ -5,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torchvision import transforms
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +37,15 @@ def load_pose_template(
 
     logger.info("Loading %d pose frames from %s (need %d)", len(npy_files), style_dir, num_frames)
 
-    to_tensor = transforms.ToTensor()
     pose_list = []
 
     for i in range(num_frames):
         # Loop through available poses if we need more frames
         npy_path = npy_files[i % len(npy_files)]
         pose_data = np.load(str(npy_path), allow_pickle=True).tolist()
+        # draw_pose_select_v2 returns numpy (3, H, W) uint8 in CHW format
         pose_img = draw_pose_select_v2(pose_data, height, width)
-        pose_tensor = to_tensor(pose_img)
+        pose_tensor = torch.from_numpy(pose_img).float() / 255.0
         pose_list.append(pose_tensor)
 
     # Stack: list of (3, H, W) -> (3, num_frames, H, W) -> (1, 3, num_frames, H, W)

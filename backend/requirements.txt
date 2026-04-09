@@ -25,9 +25,10 @@ ffmpeg-python
 
 # Video
 moviepy==2.1.2
+av>=12.0.0
 
 # Utilities
-numpy>=1.24.0
+numpy>=1.24.0,<2.0
 opencv-python-headless>=4.8.0
 scipy>=1.11.0
 boto3>=1.35.0
