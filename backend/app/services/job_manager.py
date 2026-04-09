@@ -229,10 +229,10 @@ class JobManager:
 
             for entry in self._history:
                 if entry.job_id == job_id:
-                    stage = "done"
-                    if entry.status == JobStatus.FAILED:
+                    stage = entry.last_stage or "done"
+                    if entry.status == JobStatus.FAILED and not entry.last_stage:
                         stage = "failed"
-                    elif entry.status == JobStatus.CANCELLED:
+                    elif entry.status == JobStatus.CANCELLED and not entry.last_stage:
                         stage = "cancelled"
 
                     return JobStatusResponse(
@@ -240,12 +240,13 @@ class JobManager:
                         status=entry.status,
                         stage=stage,
                         stage_label=STAGE_LABELS.get(stage, stage),
-                        progress=1.0 if entry.status == JobStatus.COMPLETED else 0.0,
+                        progress=1.0 if entry.status == JobStatus.COMPLETED else entry.last_progress,
                         elapsed_seconds=entry.elapsed_seconds,
                         created_at=entry.created_at,
                         completed_at=entry.completed_at,
                         settings=entry.settings,
                         result=entry.result,
+                        error=entry.error,
                     )
         return None
 
@@ -276,6 +277,9 @@ class JobManager:
             settings=job.settings,
             result=job.result,
             elapsed_seconds=job.elapsed_seconds,
+            error=job.error,
+            last_stage=job.stage,
+            last_progress=job.progress,
         )
         self._history.append(entry)
         if len(self._history) > settings.max_history_entries:

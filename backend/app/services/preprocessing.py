@@ -33,12 +33,17 @@ def preprocess_audio(
     output_path: str,
     target_sample_rate: int = 16000,
     target_lufs: float = -14.0,
-    max_duration_seconds: int = 120,
+    max_duration_seconds: int | None = None,
 ) -> tuple[float, int]:
     """Normalize audio to WAV 16kHz mono with volume normalization.
 
     Returns (duration_seconds, sample_rate).
     """
+    from app.config import settings
+
+    if max_duration_seconds is None:
+        max_duration_seconds = settings.max_audio_duration_seconds
+
     audio = AudioSegment.from_file(input_path)
 
     # Convert to mono

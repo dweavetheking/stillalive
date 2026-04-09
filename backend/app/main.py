@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.routes import generate, health, upload
+from app.routes.health import install_log_buffer
 from app.services.generation_queue import generation_queue
 from app.services.pipeline import pipeline
 
@@ -16,6 +17,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
+install_log_buffer()
 logger = logging.getLogger(__name__)
 
 

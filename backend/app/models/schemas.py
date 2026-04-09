@@ -104,6 +104,9 @@ class HistoryEntry(BaseModel):
     result: Optional[GenerationResult] = None
     thumbnail_filename: Optional[str] = None
     elapsed_seconds: float = 0.0
+    error: Optional[str] = None
+    last_stage: Optional[str] = None
+    last_progress: float = 0.0
 
 
 class HistoryResponse(BaseModel):
