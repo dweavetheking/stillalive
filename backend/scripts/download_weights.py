@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
-"""Download EchoMimic V2 pretrained weights to a RunPod network volume.
+"""Download EchoMimic V3 Flash models to a RunPod network volume.
 
 Run this once on your RunPod instance before starting the API:
     python scripts/download_weights.py --model-dir /workspace/models
-
-This downloads:
-    - sd-vae-ft-mse (VAE)
-    - sd-image-variations-diffusers (base SD model)
-    - EchoMimicV2 weights (UNets, pose encoder, audio processor, motion module)
-    - Pose templates
 """
 
 import argparse
@@ -30,59 +24,57 @@ def main():
     model_dir = args.model_dir
     os.makedirs(model_dir, exist_ok=True)
 
-    # Clone EchoMimic V2 repo (for source code + configs)
-    echomimic_dir = os.path.join(model_dir, "echomimic_v2")
-    if not os.path.exists(echomimic_dir):
-        run(f"git clone https://github.com/antgroup/echomimic_v2.git {echomimic_dir}")
+    # Clone EchoMimic V3 repo (for source code: pipeline, transformer, wav2vec2 modules)
+    v3_dir = os.path.join(model_dir, "echomimic_v3")
+    if not os.path.exists(v3_dir):
+        run(f"git clone https://github.com/antgroup/echomimic_v3.git {v3_dir}")
     else:
-        print(f"EchoMimic V2 repo already exists at {echomimic_dir}")
+        print(f"EchoMimic V3 repo already exists at {v3_dir}")
 
-    # Download pretrained weights from HuggingFace
-    weights_dir = os.path.join(echomimic_dir, "pretrained_weights")
-    os.makedirs(weights_dir, exist_ok=True)
-
-    # Use huggingface_hub to download
     try:
         from huggingface_hub import snapshot_download
     except ImportError:
         run("pip install huggingface_hub")
         from huggingface_hub import snapshot_download
 
-    # SD VAE
-    vae_dir = os.path.join(model_dir, "sd-vae-ft-mse")
-    if not os.path.exists(vae_dir):
-        print("Downloading sd-vae-ft-mse...")
-        snapshot_download("stabilityai/sd-vae-ft-mse", local_dir=vae_dir)
+    # Wan2.1-Fun base model (VAE, text encoder, CLIP, tokenizer, config)
+    wan_dir = os.path.join(model_dir, "Wan2.1-Fun-V1.1-1.3B-InP")
+    if not os.path.exists(wan_dir):
+        print("Downloading Wan2.1-Fun-V1.1-1.3B-InP base model...")
+        snapshot_download("alibaba-pai/Wan2.1-Fun-V1.1-1.3B-InP", local_dir=wan_dir)
     else:
-        print("sd-vae-ft-mse already downloaded")
+        print("Wan2.1-Fun base model already downloaded")
 
-    # SD Image Variations
-    sd_dir = os.path.join(model_dir, "sd-image-variations-diffusers")
-    if not os.path.exists(sd_dir):
-        print("Downloading sd-image-variations-diffusers...")
-        snapshot_download("lambdalabs/sd-image-variations-diffusers", local_dir=sd_dir)
+    # EchoMimic V3 transformer weights (includes flash-pro variant)
+    v3_weights = os.path.join(model_dir, "EchoMimicV3")
+    if not os.path.exists(v3_weights):
+        print("Downloading EchoMimicV3 weights...")
+        snapshot_download("BadToBest/EchoMimicV3", local_dir=v3_weights)
     else:
-        print("sd-image-variations-diffusers already downloaded")
+        print("EchoMimicV3 weights already downloaded")
 
-    # EchoMimic V2 weights
-    echo_weights = os.path.join(model_dir, "echomimic_v2_weights")
-    if not os.path.exists(echo_weights):
-        print("Downloading EchoMimicV2 weights...")
-        snapshot_download("BadToBest/EchoMimicV2", local_dir=echo_weights)
-        # Copy weights into the expected location
-        for f in os.listdir(echo_weights):
-            src = os.path.join(echo_weights, f)
-            dst = os.path.join(weights_dir, f)
-            if os.path.isfile(src) and not os.path.exists(dst):
-                os.symlink(src, dst)
-                print(f"  Linked {f}")
+    # Chinese Wav2Vec2 audio encoder (for Flash variant)
+    wav2vec_dir = os.path.join(model_dir, "chinese-wav2vec2-base")
+    if not os.path.exists(wav2vec_dir):
+        print("Downloading chinese-wav2vec2-base audio encoder...")
+        try:
+            snapshot_download("TencentGameMate/chinese-wav2vec2-base", local_dir=wav2vec_dir)
+        except Exception:
+            # Fallback: try ModelScope if HuggingFace doesn't have it
+            print("HuggingFace download failed, trying modelscope...")
+            run(f"pip install modelscope")
+            from modelscope.hub.snapshot_download import snapshot_download as ms_download
+            ms_download("TencentGameMate/chinese-wav2vec2-base", cache_dir=wav2vec_dir)
     else:
-        print("EchoMimicV2 weights already downloaded")
+        print("chinese-wav2vec2-base already downloaded")
 
-    print("\nAll weights downloaded!")
+    print("\nAll V3 Flash models downloaded!")
     print(f"Model directory: {model_dir}")
-    print("\nTo start the API server:")
-    print(f"  ECHOMIMIC_MODEL_DIR={model_dir} uvicorn app.main:app --host 0.0.0.0 --port 8000")
+    print(f"\nTo start the API server:")
+    print(f"  cd /workspace/stillalive/backend")
+    print(f"  ECHOMIMIC_MODEL_DIR={model_dir} \\")
+    print(f"  PYTHONPATH={v3_dir}:$PYTHONPATH \\")
+    print(f"  uvicorn app.main:app --host 0.0.0.0 --port 8888")
 
 
 if __name__ == "__main__":

@@ -124,7 +124,7 @@ export function startGeneration(args: {
     motion_scale: number;
     seed: number;
     resolution: Resolution;
-    preset?: "subtle" | "standard" | "expressive";
+    prompt: string;
   };
 }): Promise<GenerateAcceptedResponse> {
   return requestJson<GenerateAcceptedResponse>("/generate", {

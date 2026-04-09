@@ -69,8 +69,7 @@ async def debug_check():
         ("upload_dir", settings.upload_dir),
         ("working_dir", settings.working_dir),
         ("output_dir", settings.output_dir),
-        ("pose_dir", settings.pose_dir),
-        ("pose_dir/01", f"{settings.pose_dir}/01"),
+        ("v3_dir", settings.echomimic_v3_dir),
         ("model_dir", settings.echomimic_model_dir),
     ]:
         p = Path(path)
@@ -81,20 +80,12 @@ async def debug_check():
             "contents": sorted(p.name for p in list(p.iterdir())[:10]) if p.is_dir() else None,
         }
 
-    # Check pose .npy files
-    pose_01 = Path(settings.pose_dir) / "01"
-    if pose_01.is_dir():
-        npy_count = len(list(pose_01.glob("*.npy")))
-        checks["pose_npy_count"] = npy_count
-    else:
-        checks["pose_npy_count"] = 0
-
     # Check src imports
     import_checks = {}
     for mod_name in [
-        "src.utils.dwpose_util",
-        "src.models.pose_encoder",
-        "src.pipelines.pipeline_echomimicv2",
+        "src.pipeline_wan_fun_inpaint_audio_2512",
+        "src.wan_transformer3d_audio_2512",
+        "src.wav2vec2",
     ]:
         try:
             __import__(mod_name)

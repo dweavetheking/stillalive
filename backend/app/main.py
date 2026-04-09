@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Still Alive",
-    description="EchoMimic V2 Studio Backend",
+    description="EchoMimic V3 Flash Studio Backend",
     version="0.1.0",
     lifespan=lifespan,
 )

@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # --- Enums ---
@@ -25,10 +25,15 @@ class Resolution(int, Enum):
 # --- Requests ---
 
 class GenerationSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     motion_scale: int = Field(default=5, ge=1, le=10)
     seed: int = Field(default=-1, description="-1 for random")
-    resolution: Resolution = Resolution.HIGH
-    pose_style: str = Field(default="01")
+    resolution: Resolution = Resolution.LOW
+    prompt: str = Field(
+        default="A person speaks naturally with gentle head movements and facial expressions",
+        description="Text prompt describing the scene and motion style",
+    )
     preset: Optional[str] = Field(default=None, description="subtle, standard, or expressive")
 
 
@@ -96,6 +101,8 @@ class BusyResponse(BaseModel):
 
 
 class HistoryEntry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
     job_id: str
     status: JobStatus
     created_at: datetime

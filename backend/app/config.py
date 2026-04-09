@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Model paths
     echomimic_model_dir: str = "/workspace/models"
-    pose_dir: str = "/workspace/models/echomimic_v2/assets/halfbody_demo/pose"
+    echomimic_v3_dir: str = "/workspace/models/echomimic_v3"
 
     # Temp storage
     temp_dir: str = "/tmp/stillalive"

@@ -116,9 +116,12 @@ export default function Home() {
   });
 
   const [motionScale, setMotionScale] = useState<number>(5);
-  const [resolution, setResolution] = useState<Resolution>(768);
+  const [resolution, setResolution] = useState<Resolution>(512);
   const [seedMode, setSeedMode] = useState<SeedMode>("random");
   const [seedInput, setSeedInput] = useState<string>("42");
+  const [prompt, setPrompt] = useState<string>(
+    "A person speaks naturally with gentle head movements and facial expressions"
+  );
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -255,7 +258,7 @@ export default function Home() {
           motion_scale: motionScale,
           resolution,
           seed,
-          preset: "standard"
+          prompt,
         }
       });
 
@@ -290,10 +293,10 @@ export default function Home() {
 
       <header className="hero">
         <p className="eyebrow">StillAlive Studio</p>
-        <h1>EchoMimic V2 Talking Avatar Generator</h1>
+        <h1>EchoMimic V3 Flash</h1>
         <p>
-          Upload one portrait and one voice track, tune expression, and render a half-body talking-head video on
-          your RunPod backend.
+          Upload one portrait and one voice track, describe the motion, and render a talking-head video
+          powered by EchoMimic V3 Flash on RunPod.
         </p>
         <p className="api-note">API target: {API_BASE}</p>
       </header>
@@ -369,6 +372,17 @@ export default function Home() {
 
         <article className="card">
           <h2>2. Configure & Generate</h2>
+
+          <label className="field">
+            <span>Scene Description</span>
+            <textarea
+              rows={2}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe how the person should move and speak..."
+              style={{ width: "100%", resize: "vertical", fontFamily: "inherit", fontSize: "inherit" }}
+            />
+          </label>
 
           <div className="slider-grid">
             <label>

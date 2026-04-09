@@ -22,9 +22,10 @@ STAGE_LABELS = {
     "queued": "Waiting to start...",
     "preprocessing_image": "Preparing your portrait...",
     "preprocessing_audio": "Processing your audio...",
-    "aligning_pose": "Setting up body pose...",
+    "encoding_audio": "Encoding audio features...",
     "loading_pipeline": "Warming up the AI engine...",
-    "generating_frames": "Generating frames (this takes a while)...",
+    "generating_frames": "Generating frames...",
+    "decoding_frames": "Decoding VAE output...",
     "assembling_video": "Assembling your video...",
     "done": "Done!",
     "failed": "Generation failed",
@@ -89,7 +90,7 @@ class JobManager:
                 return job.model_copy()
             return None
 
-    def update_stage(self, job_id: str, stage: str, progress: float = 0.0):
+    def update_stage(self, job_id: str, stage: str, progress: float = 0.0, label: str | None = None):
         with self._lock:
             if not self._current_job or self._current_job.job_id != job_id:
                 return
@@ -98,7 +99,7 @@ class JobManager:
 
             self._current_job.status = JobStatus.PROCESSING
             self._current_job.stage = stage
-            self._current_job.stage_label = STAGE_LABELS.get(stage, stage)
+            self._current_job.stage_label = label or STAGE_LABELS.get(stage, stage)
             self._current_job.progress = min(max(progress, 0.0), 1.0)
             elapsed = (datetime.now(timezone.utc) - self._current_job.created_at).total_seconds()
             self._current_job.elapsed_seconds = elapsed

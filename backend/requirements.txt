@@ -8,20 +8,22 @@ pydantic-settings==2.7.1
 
 # Audio processing
 pydub==0.25.1
+librosa>=0.10.0
+pyloudnorm>=0.1.0
 
 # Image processing
 Pillow>=9.2.0,<11.0
 
-# ML - pinned for PyTorch 2.4 compatibility
+# ML - EchoMimic V3 Flash
 torch>=2.1.0
 torchvision>=0.16.0
 torchaudio>=2.1.0
-diffusers==0.30.3
-transformers==4.44.2
-accelerate==0.33.0
-omegaconf>=2.3.0
+diffusers>=0.30.3
+transformers>=4.44.2
+accelerate>=0.33.0
 einops>=0.7.0
-ffmpeg-python
+sentencepiece>=0.1.99
+safetensors>=0.4.0
 
 # Video
 moviepy==2.1.2
