@@ -64,7 +64,7 @@ class EchoMimicPipeline:
         wav2vec_dir = os.path.join(model_dir, "chinese-wav2vec2-base")
 
         # --- Import V3 components (from echomimic_v3 repo on PYTHONPATH) ---
-        from diffusers import FlowUniPCMultistepScheduler
+        from src.fm_solvers_unipc import FlowUniPCMultistepScheduler
         from transformers import AutoFeatureExtractor, AutoTokenizer
         from src.pipeline_wan_fun_inpaint_audio_2512 import WanFunInpaintAudioPipeline
         from src.wan_transformer3d_audio_2512 import WanTransformerAudioMask3DModel
