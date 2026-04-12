@@ -137,6 +137,11 @@ class EchoMimicPipeline:
             clip_image_encoder=clip_image_encoder,
         )
 
+        # Offload text encoder and CLIP to CPU to free VRAM for inference
+        self.pipe.text_encoder.to("cpu")
+        self.pipe.clip_image_encoder.to("cpu")
+        torch.cuda.empty_cache()
+
         # --- Audio encoder (Wav2Vec2 Flash variant) ---
         logger.info("Loading Wav2Vec2 audio encoder...")
         self.audio_processor = AutoFeatureExtractor.from_pretrained(wav2vec_dir)
@@ -213,9 +218,12 @@ class EchoMimicPipeline:
                 return
 
             # Calculate frame count (aligned to VAE temporal compression)
+            # Cap at 750 frames (~30s at 25fps) to fit in 24GB VRAM at 512x512
+            MAX_FRAMES = 750
             raw_frames = int(duration * FPS)
             if raw_frames < 1:
                 raise ValueError("Audio too short to generate any frames")
+            raw_frames = min(raw_frames, MAX_FRAMES)
             video_length = int((raw_frames - 1) // self.vae_temporal_ratio * self.vae_temporal_ratio) + 1
 
             # --- Stage: encoding_audio ---
@@ -278,6 +286,9 @@ class EchoMimicPipeline:
 
             self.pipe.scheduler.step = _progress_step
             try:
+                # Move text encoder and CLIP to GPU for inference, then back
+                self.pipe.text_encoder.to(self.device)
+                self.pipe.clip_image_encoder.to(self.device)
                 with torch.no_grad():
                     sample = self.pipe(
                         prompt,
@@ -305,6 +316,9 @@ class EchoMimicPipeline:
                     ).videos
             finally:
                 self.pipe.scheduler.step = original_step
+                self.pipe.text_encoder.to("cpu")
+                self.pipe.clip_image_encoder.to("cpu")
+                torch.cuda.empty_cache()
 
             if job_manager.is_cancelled(job_id):
                 return
