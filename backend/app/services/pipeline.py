@@ -97,7 +97,7 @@ class EchoMimicPipeline:
             additional_kwargs=v3_config["text_encoder_kwargs"],
             low_cpu_mem_usage=True,
             torch_dtype=self.weight_dtype,
-        ).eval()
+        ).to(self.device).eval()
 
         # --- Tokenizer ---
         tok_subpath = v3_config["text_encoder_kwargs"]["tokenizer_subpath"]
