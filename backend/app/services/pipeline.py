@@ -73,36 +73,42 @@ class EchoMimicPipeline:
         from src.wan_image_encoder import CLIPModel
         from src.wav2vec2 import Wav2Vec2Model
 
-        # --- Load config ---
-        import json
-        config_path = os.path.join(wan_base, "config.json")
-        with open(config_path) as f:
-            wan_config = json.load(f)
-        vae_kwargs = wan_config.get("vae_kwargs", {})
+        # --- Load V3 config (from echomimic_v3 repo) ---
+        import yaml
+        v3_config_path = os.path.join(settings.echomimic_v3_dir, "config", "config.yaml")
+        with open(v3_config_path) as f:
+            v3_config = yaml.safe_load(f)
 
         # --- VAE ---
         logger.info("Loading VAE...")
-        vae_path = os.path.join(wan_base, "Wan2.1_VAE.pth")
-        vae = AutoencoderKLWan.from_pretrained(
-            vae_path, additional_kwargs=vae_kwargs
-        ).to(self.device, dtype=self.weight_dtype)
-        self.vae_temporal_ratio = getattr(vae.config, "temporal_compression_ratio", 4)
+        vae_subpath = v3_config["vae_kwargs"]["vae_subpath"]
+        vae_path = os.path.join(wan_base, vae_subpath)
+        vae = AutoencoderKLWan.from_pretrained(vae_path).to(
+            self.device, dtype=self.weight_dtype
+        )
+        self.vae_temporal_ratio = v3_config["vae_kwargs"].get("temporal_compression_ratio", 4)
 
         # --- Text encoder ---
         logger.info("Loading text encoder...")
-        t5_path = os.path.join(wan_base, "models_t5_umt5-xxl-enc-bf16.pth")
+        t5_subpath = v3_config["text_encoder_kwargs"]["text_encoder_subpath"]
+        t5_path = os.path.join(wan_base, t5_subpath)
         text_encoder = WanT5EncoderModel.from_pretrained(
-            t5_path, torch_dtype=self.weight_dtype
-        ).to(self.device).eval()
+            t5_path,
+            additional_kwargs=v3_config["text_encoder_kwargs"],
+            low_cpu_mem_usage=True,
+            torch_dtype=self.weight_dtype,
+        ).eval()
 
         # --- Tokenizer ---
+        tok_subpath = v3_config["text_encoder_kwargs"]["tokenizer_subpath"]
         tokenizer = AutoTokenizer.from_pretrained(
-            os.path.join(wan_base, "google", "umt5-xxl")
+            os.path.join(wan_base, tok_subpath)
         )
 
         # --- CLIP image encoder ---
         logger.info("Loading CLIP image encoder...")
-        clip_path = os.path.join(wan_base, "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth")
+        clip_subpath = v3_config["image_encoder_kwargs"]["image_encoder_subpath"]
+        clip_path = os.path.join(wan_base, clip_subpath)
         clip_image_encoder = CLIPModel.from_pretrained(
             clip_path
         ).to(self.device, dtype=self.weight_dtype).eval()
