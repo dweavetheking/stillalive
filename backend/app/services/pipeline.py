@@ -82,24 +82,29 @@ class EchoMimicPipeline:
 
         # --- VAE ---
         logger.info("Loading VAE...")
+        vae_path = os.path.join(wan_base, "Wan2.1_VAE.pth")
         vae = AutoencoderKLWan.from_pretrained(
-            wan_base, additional_kwargs=vae_kwargs
+            vae_path, additional_kwargs=vae_kwargs
         ).to(self.device, dtype=self.weight_dtype)
         self.vae_temporal_ratio = getattr(vae.config, "temporal_compression_ratio", 4)
 
         # --- Text encoder ---
         logger.info("Loading text encoder...")
+        t5_path = os.path.join(wan_base, "models_t5_umt5-xxl-enc-bf16.pth")
         text_encoder = WanT5EncoderModel.from_pretrained(
-            wan_base, torch_dtype=self.weight_dtype
+            t5_path, torch_dtype=self.weight_dtype
         ).to(self.device).eval()
 
         # --- Tokenizer ---
-        tokenizer = AutoTokenizer.from_pretrained(wan_base)
+        tokenizer = AutoTokenizer.from_pretrained(
+            os.path.join(wan_base, "google", "umt5-xxl")
+        )
 
         # --- CLIP image encoder ---
         logger.info("Loading CLIP image encoder...")
+        clip_path = os.path.join(wan_base, "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth")
         clip_image_encoder = CLIPModel.from_pretrained(
-            wan_base
+            clip_path
         ).to(self.device, dtype=self.weight_dtype).eval()
 
         # --- Transformer (V3 Flash weights) ---
